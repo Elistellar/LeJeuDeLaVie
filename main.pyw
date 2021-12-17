@@ -27,6 +27,9 @@ class Game:
         pygame.display.init()
         self.window = pygame.display.set_mode(self.MIN_WINDOW_SIZE, pygame.RESIZABLE)
         pygame.display.set_caption('Le Jeu de la vie')
+        icon = pygame.image.load('icon.ico')
+        pygame.display.set_icon(icon)
+        
         self.window_size = self.MIN_WINDOW_SIZE
         
         self.clock = pygame.time.Clock()
