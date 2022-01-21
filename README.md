@@ -11,3 +11,17 @@ At each step in time, the following transitions occur:
 - Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 
 [cf Wikipedia](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life)
+
+## Controls
+You can :
+- place and remove cells by clicking on the grid
+- move the camera over the grid dragging your mouse
+- zoom with the mouse wheel
+- go to the center of the grid with `C`
+- reset the simulation with `R`
+- manually calculate a generation with `space`
+- automatically calculate :
+  - 2 generations per second with `2`
+  - 5 generations per second with `3`
+  - 10 generations per second with `4`
+- stop the automatic calculation with `1`
