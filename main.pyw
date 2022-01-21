@@ -1,3 +1,6 @@
+import threading
+import time
+
 import pygame
 
 
@@ -8,8 +11,19 @@ class Game:
     You can place cells by clicking,
     restart pressing "r",
     recenter the view pressing "c"
-    and compute a turn pressing "space"
+    compute a turn pressing "space",
+    compute 2 turns per second pressing "2",
+    compute 5 turns per second pressing "3",
+    compute 10 turns per second pressing "4",
+    and stop auto compute pressing "1"
     """
+    
+    AUTO_COMPUTE_KEYS = {
+        pygame.K_1: 0,
+        pygame.K_2: 2,
+        pygame.K_3: 5,
+        pygame.K_4: 10,
+    }
     
     MIN_WINDOW_SIZE = 1280, 720
     
@@ -26,13 +40,16 @@ class Game:
     def __init__(self) -> None:
         pygame.display.init()
         self.window = pygame.display.set_mode(self.MIN_WINDOW_SIZE, pygame.RESIZABLE)
-        pygame.display.set_caption('Le Jeu de la vie')
+        pygame.display.set_caption('Le Jeu de la Vie')
         icon = pygame.image.load('icon.ico')
         pygame.display.set_icon(icon)
         
         self.window_size = self.MIN_WINDOW_SIZE
         
         self.clock = pygame.time.Clock()
+        
+        self.auto_compute_mode = 0
+        self.auto_compute_thread = None
 
         self.cell_size = self.DEFAULT_CELL_SIZE
         self.cells = [
@@ -64,7 +81,25 @@ class Game:
                 if event.key == pygame.K_SPACE:
                     self.compute_turn()
                     
+                elif event.key in self.AUTO_COMPUTE_KEYS:
+                    
+                    self.auto_compute_mode = 0
+                    if self.auto_compute_thread:
+                        self.auto_compute_thread.join()
+                    if self.AUTO_COMPUTE_KEYS[event.key] != 0:
+                        self.auto_compute_mode = self.AUTO_COMPUTE_KEYS[event.key]
+                        self.auto_compute_thread = threading.Thread(
+                            name   = 'AutoCompute',
+                            target = self.auto_compute_turns
+                        )
+                        self.auto_compute_thread.start()
+                    
                 elif event.key == pygame.K_c:
+                    self.tlx_offset = 0
+                    self.tly_offset = 0
+                    
+                elif event.key == pygame.K_r:
+                    self.cells = [(0, 0)]
                     self.tlx_offset = 0
                     self.tly_offset = 0
                     
@@ -119,6 +154,7 @@ class Game:
             
             # Quit
             elif event.type == pygame.QUIT:
+                self.auto_compute_mode = 0
                 self.running = False
                 
         self.render()
@@ -170,6 +206,11 @@ class Game:
                     if (c := (cell[0] + x, cell[1] + y)) not in self.cells:
                         epa.append(c)
         return epa
+        
+    def auto_compute_turns(self):
+        while (freq := self.auto_compute_mode):
+            self.compute_turn()
+            time.sleep(1 / freq)
         
 if __name__ == '__main__':
     g = Game()
